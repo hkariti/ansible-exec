@@ -19,10 +19,9 @@ function usage {
 }
 
 function get_arg {
-    opt=$1
     shift
     [ $# = 0 ] && return 1
-    echo $1
+    echo "$1"
 }
 
 function args_error {
@@ -36,7 +35,7 @@ if [ $# = 0 ]; then
 fi
 
 playbook=$1
-playbook_dir=`dirname "$playbook"`
+playbook_dir=$(dirname "$playbook")
 inventory="ansible_exec_dummy,"
 ansible_playbook=ansible-playbook
 conf_files=(~/.ansible-exec.conf /etc/ansible/ansible-exec.conf)
@@ -44,6 +43,7 @@ ansible_args=()
 
 for c in "${conf_files[@]}"; do
     if [ -f "$c" ]; then
+        #shellcheck disable=SC1090
         source "$c"
         [ -n "$ANSIBLE_PLAYBOOK_ARGS" ] && ansible_args+=("${ANSIBLE_PLAYBOOK_ARGS[@]}")
         [ -n "$DEFAULT_INVENTORY" ] && inventory=$DEFAULT_INVENTORY
@@ -59,11 +59,11 @@ while [ -n "$1" ]; do
             break
             ;;
         -i)
-            inventory=`get_arg "$@"` || args_error $1
+            inventory=$(get_arg "$@") || args_error "$1"
             shift
             ;;
         -e)
-            var=`get_arg "$@"` || args_error $1
+            var=$(get_arg "$@") || args_error "$1"
             var=${2%%=*}
             value=${2#*=}
             ansible_args+=(-e "$var=\"$value\"")
@@ -71,11 +71,11 @@ while [ -n "$1" ]; do
             ;;
         --*)
             var=${1#--}
-            if echo $var | grep -q =; then
+            if echo "$var" | grep -q =; then
                 value=${var#*=}
                 var=${var%%=*}
             else
-                value=`get_arg "$@"` || args_error $1
+                value=$(get_arg "$@") || args_error "$1"
                 shift
             fi
 
